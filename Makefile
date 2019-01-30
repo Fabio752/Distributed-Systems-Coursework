@@ -23,4 +23,4 @@ udp:
 
 .PHONY : clean
 clean:
-	rm rmi/*.class udp/*.class common/*.class
+	rm -f rmi/*.class udp/*.class common/*.class
