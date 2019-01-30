@@ -19,11 +19,11 @@ public class UDPServer {
 
 	private DatagramSocket recvSoc;
 	private int totalMessages = -1;
-	private int[] receivedMessages;
+	private int[] receivedMessages = null;
 	private boolean close;
 
 	private void run() {
-		int	pacSize = 1024;
+		int	pacSize = 8192;
 		byte[] pacData = new byte[pacSize];
 		DatagramPacket pac;
 
@@ -31,6 +31,7 @@ public class UDPServer {
 		// Timeout to ensure the program doesn't block forever.
 		close = false;
 		while(!close) {
+			pacData = new byte[pacSize];
 			pac = new DatagramPacket(pacData, pacSize);
 			try {
 				recvSoc.setSoTimeout(timeout);
@@ -46,40 +47,53 @@ public class UDPServer {
 				System.out.println("Quitting server.");
 				System.exit(-1);
 			}
+
 			processMessage(new String(pac.getData()));
 		}
 	}
 
 	public void processMessage(String data) {
 		MessageInfo msg = null;
-		
 		// Use the data to construct a new MessageInfo object.
 		try {
-			msg = new MessageInfo(data);
+			msg = new MessageInfo(data.trim());
 		} catch (Exception e) {
 			System.out.println("Message exception: " + e.getMessage());
+			System.out.println("Quitting server.");
+			System.exit(-1);
 		}
 
 		// On receipt of first message, initialise the receive buffer
 		// and update the totalMessages count.
-		if (receivedMessages.length == 0) {
+		if (receivedMessages == null || receivedMessages.length == 0) {
 			totalMessages = msg.totalMessages;
 			receivedMessages = new int[totalMessages];
 			System.out.println("New set of message with " + totalMessages +
 												 " messages.");
 		}
-
 		receivedMessages[msg.messageNum] = 1;
-		System.out.println(msg.toString());
+		System.out.print(msg.messageNum + "\t");
 
 		// If this is the last expected message, then identify any
 		// missing messages.
 		if (msg.messageNum == totalMessages - 1) {
 			close = true;
+			int lostCount = 0;
+			System.out.println("\nLost messages: ");
 			for (int i = 0; i < receivedMessages.length; i++ ) {
-				System.out.print(i + " ");
+				if (receivedMessages[i] == 0) {
+					lostCount++;
+					System.out.print(i + " ");
+				}
 			}
 			System.out.println();
+			System.out.println(
+				"Received: " +  (totalMessages - lostCount) + "/" +
+				totalMessages + "  ->  " + 
+				(Double.valueOf((totalMessages - lostCount) / totalMessages)*100) + "%");
+			System.out.println(
+				"Lost:     " + lostCount + "/" + totalMessages + "  ->  " + 
+				(Double.valueOf(lostCount / totalMessages)*100) + "%");
 		}
 	}
 
