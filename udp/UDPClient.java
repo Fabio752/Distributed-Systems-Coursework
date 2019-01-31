@@ -16,6 +16,10 @@ import common.MessageInfo;
 
 public class UDPClient {
 
+	// Interval to sleep between two send requests to the server (ms).
+	// Needed in order to not overload the receiving socket.
+	private final int SLEEP_INTERVAL = 1;
+
 	private DatagramSocket sendSoc;
 
 	public static void main(String[] args) {
@@ -63,6 +67,13 @@ public class UDPClient {
 		for (int tries = 0; tries < countTo; tries++) {
 			String payload = countTo + ";" + tries;
 			send(payload, serverAddr, recvPort);
+			try {
+				Thread.sleep(SLEEP_INTERVAL);
+			} catch (InterruptedException e) {
+				System.out.println(e);
+				System.out.println("Quitting...");
+				System.exit(-1);
+			}
 		}
 	}
 

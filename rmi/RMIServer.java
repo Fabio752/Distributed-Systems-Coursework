@@ -22,6 +22,8 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
 	private int totalMessages = -1;
 	private int[] receivedMessages;
+	private long startTime;
+	private long endTime;
 
 	public RMIServer() throws RemoteException {
 		super();
@@ -36,6 +38,8 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			System.out.println("\n\n====================================");
 			System.out.println("New set of message with " + totalMessages +
 												 " messages.");
+			// Start time measurment.
+			startTime = System.nanoTime();
 		}
 
 		receivedMessages[msg.messageNum] = 1;
@@ -44,6 +48,10 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		// If this is the last expected message, then identify any
 		// missing messages.
 		if (msg.messageNum == totalMessages - 1) {
+			// End time measurment.
+			endTime = System.nanoTime();
+			double elapsedTime = (endTime - startTime) / 1000000;
+
 			int lostCount = 0;
 			System.out.println("\nLost messages: ");
 			for (int i = 0; i < receivedMessages.length; i++ ) {
@@ -61,6 +69,11 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			System.out.println(
 				"Lost:     " + lostCount + "/" + totalMessages + "\t->  " + 
 				(Double.valueOf(lostCount / totalMessages)*100) + "%");
+			System.out.println(
+				"Total time elapsed (ms): " + String.format("%.3f", elapsedTime));
+			System.out.println(
+				"Estimate time per package (ms): " +
+				String.format("%.3f", elapsedTime / totalMessages));
 		}
 	}
 

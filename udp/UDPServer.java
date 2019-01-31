@@ -16,6 +16,8 @@ public class UDPServer {
 
 	// Timeout to receive a message, in milliseconds.
 	private final static int timeout = 30000;
+	private long startTime;
+	private long endTime;
 
 	private DatagramSocket recvSoc;
 	private int totalMessages = -1;
@@ -70,6 +72,8 @@ public class UDPServer {
 			receivedMessages = new int[totalMessages];
 			System.out.println("New set of message with " + totalMessages +
 												 " messages.");
+			// Start time measurment.
+			startTime = System.nanoTime();
 		}
 		receivedMessages[msg.messageNum] = 1;
 		System.out.print(msg.messageNum + "\t");
@@ -77,6 +81,10 @@ public class UDPServer {
 		// If this is the last expected message, then identify any
 		// missing messages.
 		if (msg.messageNum == totalMessages - 1) {
+			// End time measurment.
+			endTime = System.nanoTime();
+			double elapsedTime = (endTime - startTime) / 1000000; 
+
 			close = true;
 			int lostCount = 0;
 			System.out.println("\nLost messages: ");
@@ -94,6 +102,11 @@ public class UDPServer {
 			System.out.println(
 				"Lost:     " + lostCount + "/" + totalMessages + "  ->  " + 
 				(Double.valueOf(lostCount / totalMessages)*100) + "%");
+			System.out.println(
+				"Total time elapsed (ms): " + String.format("%.3f", elapsedTime));
+			System.out.println(
+				"Estimate time per package (ms): " +
+				String.format("%.3f", elapsedTime / totalMessages));
 		}
 	}
 
