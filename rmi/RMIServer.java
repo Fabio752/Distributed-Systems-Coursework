@@ -16,8 +16,9 @@ import common.*;
 
 public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
-	// Default port for RMI registry.
-	private final static int REGISTRY_PORT = 1099; 
+	// Port for RMI registry. Must match the one used by the client.
+	// Default is 1099.
+	private final static int REGISTRY_PORT = 5000; 
 
 	private int totalMessages = -1;
 	private int[] receivedMessages;
@@ -67,7 +68,9 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		try {
 			// Create registry to bind remote objects to the client.
 			// Served at the specified port.
-			LocateRegistry.createRegistry(REGISTRY_PORT);
+			// If you want to use default port:
+			// --> LocateRegistry.CreateRegistry();
+			Registry registry = LocateRegistry.createRegistry(REGISTRY_PORT);
 
 			// Bind the object created on the server to the entry in the
 			// registry.
@@ -76,12 +79,10 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			// string. The only constraints:
 			// - it has to match the one in the client,
 			// - the serverURL has to be a valid and usable address.
-			Naming.rebind("rmi://" + serverURL + "/RMIServer", server);
+			// If you want to use default port:
+			// --> Naming.rebind("rmi://" +serverURL+ "/RMIServer", server);
+			registry.rebind("rmi://" + serverURL + "/RMIServer", server);
 		} catch (RemoteException e) {
-			System.out.println(e);
-			System.out.println("Quitting...");
-			System.exit(-1);
-		} catch (MalformedURLException e) {
 			System.out.println(e);
 			System.out.println("Quitting...");
 			System.exit(-1);

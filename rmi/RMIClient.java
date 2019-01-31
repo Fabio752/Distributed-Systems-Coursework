@@ -14,6 +14,11 @@ import common.MessageInfo;
 
 public class RMIClient {
 
+	// Port for RMI registry on the server.
+	// Must match the one used by the server.
+	// Default is 1099.
+	private final static int REGISTRY_PORT = 5000;
+
 	// Example run: ./rmiclient.sh 127.0.1.1 200
 	public static void main(String[] args) {
 		// Check arguments for Server host and number of messages.
@@ -32,8 +37,10 @@ public class RMIClient {
 		}
 
 		try {
-			// Bind to RMIServer.
-			RMIServerI remoteObject = (RMIServerI)Naming.lookup(urlServer);
+			// Get the registry located at the specified port on the server
+			// and then bind a local object to the remote object.
+			Registry registry = LocateRegistry.getRegistry(REGISTRY_PORT);
+			RMIServerI remoteObject = (RMIServerI)registry.lookup(urlServer);
 
 			// Attempt to send messages the specified number of times.
 			for (int i = 0; i < numMessages; i++) {
