@@ -6,7 +6,9 @@ package rmi;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.RemoteException;
+import java.rmi.RMISecurityManager;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 
@@ -14,45 +16,89 @@ import common.*;
 
 public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
+	// Default port for RMI registry.
+	private final static int REGISTRY_PORT = 1099; 
+
 	private int totalMessages = -1;
 	private int[] receivedMessages;
 
 	public RMIServer() throws RemoteException {
+		super();
 	}
 
 	public void receiveMessage(MessageInfo msg) throws RemoteException {
+		// On receipt of first message, initialise the receive buffer.
+		if (receivedMessages == null ||
+				receivedMessages.length != msg.totalMessages) {
+			totalMessages = msg.totalMessages;
+			receivedMessages = new int[totalMessages];
+			System.out.println("\n\n====================================");
+			System.out.println("New set of message with " + totalMessages +
+												 " messages.");
+		}
 
-		// TO-DO: On receipt of first message, initialise the receive buffer
+		receivedMessages[msg.messageNum] = 1;
+		System.out.print(msg.messageNum + "\t");
 
-		// TO-DO: Log receipt of the message
-
-		// TO-DO: If this is the last expected message, then identify
-		//        any missing messages
-
-	}
-
-
-	public static void main(String[] args) {
-
-		RMIServer rmis = null;
-
-		// TO-DO: Initialise Security Manager
-
-		// TO-DO: Instantiate the server class
-
-		// TO-DO: Bind to RMI registry
-
+		// If this is the last expected message, then identify any
+		// missing messages.
+		if (msg.messageNum == totalMessages - 1) {
+			int lostCount = 0;
+			System.out.println("\nLost messages: ");
+			for (int i = 0; i < receivedMessages.length; i++ ) {
+				if (receivedMessages[i] == 0) {
+					lostCount++;
+					System.out.print(i + " ");
+				}
+			}
+			System.out.println();
+			System.out.println(
+				"Received: " +  (totalMessages - lostCount) + "/" +
+				totalMessages + "\t->  " + 
+				(Double.valueOf((totalMessages - lostCount) / totalMessages)*100)
+				+ "%");
+			System.out.println(
+				"Lost:     " + lostCount + "/" + totalMessages + "\t->  " + 
+				(Double.valueOf(lostCount / totalMessages)*100) + "%");
+		}
 	}
 
 	protected static void rebindServer(String serverURL, RMIServer server) {
+		try {
+			// Create registry to bind remote objects to the client.
+			// Served at the specified port.
+			LocateRegistry.createRegistry(REGISTRY_PORT);
 
-		// TO-DO:
-		// Start / find the registry (hint use LocateRegistry.createRegistry(...)
-		// If we *know* the registry is running we could skip this (eg run rmiregistry in the start script)
+			// Bind the object created on the server to the entry in the
+			// registry.
+			Naming.rebind("rmi://" + serverURL + "/RMIServer", server);
+		} catch (RemoteException e) {
+			System.out.println(e);
+			System.out.println("Quitting...");
+			System.exit(-1);
+		} catch (MalformedURLException e) {
+			System.out.println(e);
+			System.out.println("Quitting...");
+			System.exit(-1);
+		}
+	}
 
-		// TO-DO:
-		// Now rebind the server to the registry (rebind replaces any existing servers bound to the serverURL)
-		// Note - Registry.rebind (as returned by createRegistry / getRegistry) does something similar but
-		// expects different things from the URL field.
+	public static void main(String[] args) {
+		// Initialise Security Manager.
+		if(System.getSecurityManager() == null) {
+			System.setSecurityManager(new RMISecurityManager());
+		}
+
+		// Instantiate the server class and bind to RMI registry.
+		try {
+			RMIServer rmiServer = new RMIServer();
+			rebindServer("127.0.1.1", rmiServer);
+		} catch (RemoteException e) {
+			System.out.println(e);
+			System.out.println("Quitting...");
+			System.exit(-1);
+		}
+
+		System.out.println("Starting server...");
 	}
 }

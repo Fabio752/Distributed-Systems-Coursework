@@ -65,7 +65,7 @@ public class UDPServer {
 
 		// On receipt of first message, initialise the receive buffer
 		// and update the totalMessages count.
-		if (receivedMessages == null || receivedMessages.length == 0) {
+		if (receivedMessages == null) {
 			totalMessages = msg.totalMessages;
 			receivedMessages = new int[totalMessages];
 			System.out.println("New set of message with " + totalMessages +
