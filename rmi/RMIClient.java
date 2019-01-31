@@ -14,12 +14,9 @@ import common.MessageInfo;
 
 public class RMIClient {
 
-	// ./rmiclient.sh 127.0.1.1 1
+	// Example run: ./rmiclient.sh 127.0.1.1 200
 	public static void main(String[] args) {
-
-		RMIServerI iRMIServer = null;
-
-		// Check arguments for Server host and number of messages
+		// Check arguments for Server host and number of messages.
 		if (args.length < 2){
 			System.out.println("Needs 2 arguments: ServerHostName/IPAddress, TotalMessageCount");
 			System.out.println("Quitting...");
@@ -42,7 +39,6 @@ public class RMIClient {
 			for (int i = 0; i < numMessages; i++) {
 				remoteObject.receiveMessage(new MessageInfo(numMessages, i));
 			}
-
 		} catch (RemoteException e) {
 			System.out.println(e);
 			System.out.println("Quitting...");

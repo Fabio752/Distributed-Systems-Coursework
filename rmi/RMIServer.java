@@ -71,6 +71,11 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
 			// Bind the object created on the server to the entry in the
 			// registry.
+			// The name of the object is absolutely arbitrary. There is no
+			// need to have rmi:// and /RMIServer. It could be whatever
+			// string. The only constraints:
+			// - it has to match the one in the client,
+			// - the serverURL has to be a valid and usable address.
 			Naming.rebind("rmi://" + serverURL + "/RMIServer", server);
 		} catch (RemoteException e) {
 			System.out.println(e);
@@ -83,7 +88,15 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		}
 	}
 
+	// Example run: ./rmiserver 127.0.1.1
 	public static void main(String[] args) {
+		// Check arguments for Server host and number of messages
+		if (args.length != 1){
+			System.out.println("Needs 1 arguments: ServerHostName/IPAddress");
+			System.out.println("Quitting...");
+			System.exit(-1);
+		}
+
 		// Initialise Security Manager.
 		if(System.getSecurityManager() == null) {
 			System.setSecurityManager(new RMISecurityManager());
@@ -92,7 +105,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		// Instantiate the server class and bind to RMI registry.
 		try {
 			RMIServer rmiServer = new RMIServer();
-			rebindServer("127.0.1.1", rmiServer);
+			rebindServer(args[0], rmiServer);
 		} catch (RemoteException e) {
 			System.out.println(e);
 			System.out.println("Quitting...");
