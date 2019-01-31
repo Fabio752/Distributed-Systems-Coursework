@@ -18,7 +18,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
 	// Port for RMI registry. Must match the one used by the client.
 	// Default is 1099.
-	private final static int REGISTRY_PORT = 5000; 
+	private final static int REGISTRY_PORT = 1099; 
 
 	private int totalMessages = -1;
 	private int[] receivedMessages;
@@ -64,24 +64,18 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		}
 	}
 
-	protected static void rebindServer(String serverURL, RMIServer server) {
+	protected static void rebindServer(String remoteObjectNameOnRegistry,
+																		 RMIServer remoteObject) {
 		try {
 			// Create registry to bind remote objects to the client.
+			// The registry is on the server machine (accessible using local
+			// or inet IP).
 			// Served at the specified port.
-			// If you want to use default port:
-			// --> LocateRegistry.CreateRegistry();
 			Registry registry = LocateRegistry.createRegistry(REGISTRY_PORT);
 
 			// Bind the object created on the server to the entry in the
 			// registry.
-			// The name of the object is absolutely arbitrary. There is no
-			// need to have rmi:// and /RMIServer. It could be whatever
-			// string. The only constraints:
-			// - it has to match the one in the client,
-			// - the serverURL has to be a valid and usable address.
-			// If you want to use default port:
-			// --> Naming.rebind("rmi://" +serverURL+ "/RMIServer", server);
-			registry.rebind("rmi://" + serverURL + "/RMIServer", server);
+			registry.rebind(remoteObjectNameOnRegistry, remoteObject);
 		} catch (RemoteException e) {
 			System.out.println(e);
 			System.out.println("Quitting...");
@@ -89,14 +83,16 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		}
 	}
 
-	// Example run: ./rmiserver 127.0.1.1
+	// Example run: ./rmiserver.sh objectNameonRegistry
 	public static void main(String[] args) {
 		// Check arguments for Server host and number of messages
 		if (args.length != 1){
-			System.out.println("Needs 1 arguments: ServerHostName/IPAddress");
+			System.out.println("Needs 1 argument: RemoteObjectName");
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}
+
+		String remoteObjectNameOnRegistry = args[0];
 
 		// Initialise Security Manager.
 		if(System.getSecurityManager() == null) {
@@ -105,8 +101,8 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 
 		// Instantiate the server class and bind to RMI registry.
 		try {
-			RMIServer rmiServer = new RMIServer();
-			rebindServer(args[0], rmiServer);
+			RMIServer remoteObject = new RMIServer();
+			rebindServer(remoteObjectNameOnRegistry, remoteObject);
 		} catch (RemoteException e) {
 			System.out.println(e);
 			System.out.println("Quitting...");

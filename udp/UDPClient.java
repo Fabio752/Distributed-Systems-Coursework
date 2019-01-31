@@ -22,7 +22,6 @@ public class UDPClient {
 		InetAddress	serverAddr = null;
 		int	recvPort;
 		int countTo;
-		String message;
 
 		// Get the parameters.
 		if (args.length < 3) {
