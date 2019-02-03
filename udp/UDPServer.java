@@ -38,15 +38,10 @@ public class UDPServer {
 			try {
 				recvSoc.setSoTimeout(timeout);
 				recvSoc.receive(pac);
-			} catch (SocketTimeoutException e) {
-				System.out.println("Socket timeout exception: " +
-													 e.getMessage());
-				System.out.println("Quitting server.");
-				System.exit(-1);
 			} catch (IOException e) {
-				System.out.println("Socket IOException: " +
-													 e.getMessage());
-				System.out.println("Quitting server.");
+				System.out.println(e);
+				e.printStackTrace();
+				System.out.println("Quitting...");
 				System.exit(-1);
 			}
 
@@ -60,8 +55,9 @@ public class UDPServer {
 		try {
 			msg = new MessageInfo(data.trim());
 		} catch (Exception e) {
-			System.out.println("Message exception: " + e.getMessage());
-			System.out.println("Quitting server.");
+			System.out.println(e);
+			e.printStackTrace();
+			System.out.println("Quitting...");
 			System.exit(-1);
 		}
 
@@ -96,14 +92,16 @@ public class UDPServer {
 			}
 			System.out.println();
 			System.out.println(
-				"Received: " +  (totalMessages - lostCount) + "/" +
+				"Received: " + (totalMessages-lostCount) + "/" +
 				totalMessages + "  ->  " + 
-				(Double.valueOf((totalMessages - lostCount) / totalMessages)*100) + "%");
+				(Double.valueOf((totalMessages-lostCount)/totalMessages)*100)
+				+ "%");
 			System.out.println(
 				"Lost:     " + lostCount + "/" + totalMessages + "  ->  " + 
 				(Double.valueOf(lostCount / totalMessages)*100) + "%");
 			System.out.println(
-				"Total time elapsed (ms): " + String.format("%.3f", elapsedTime));
+				"Total time elapsed (ms): " +
+				String.format("%.3f", elapsedTime));
 			System.out.println(
 				"Estimate time per package (ms): " +
 				String.format("%.3f", elapsedTime / totalMessages));
@@ -116,7 +114,9 @@ public class UDPServer {
 		try {
 			recvSoc = new DatagramSocket(rp);
 		} catch (SocketException e) {
-			System.out.println("Socket exception: " + e.getMessage());
+			System.out.println(e);
+			e.printStackTrace();
+			System.out.println("Quitting...");
 			System.exit(-1);
 		}
 
@@ -138,5 +138,4 @@ public class UDPServer {
 		UDPServer udpServer = new UDPServer(recvPort);
 		udpServer.run();
 	}
-
 }

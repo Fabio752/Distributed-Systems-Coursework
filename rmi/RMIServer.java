@@ -62,15 +62,16 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			}
 			System.out.println();
 			System.out.println(
-				"Received: " +  (totalMessages - lostCount) + "/" +
+				"Received: " + (totalMessages-lostCount) + "/" +
 				totalMessages + "\t->  " + 
-				(Double.valueOf((totalMessages - lostCount) / totalMessages)*100)
+				(Double.valueOf((totalMessages-lostCount)/totalMessages)*100)
 				+ "%");
 			System.out.println(
 				"Lost:     " + lostCount + "/" + totalMessages + "\t->  " + 
 				(Double.valueOf(lostCount / totalMessages)*100) + "%");
 			System.out.println(
-				"Total time elapsed (ms): " + String.format("%.3f", elapsedTime));
+				"Total time elapsed (ms): " +
+				String.format("%.3f", elapsedTime));
 			System.out.println(
 				"Estimate time per package (ms): " +
 				String.format("%.3f", elapsedTime / totalMessages));
@@ -91,6 +92,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			registry.rebind(remoteObjectNameOnRegistry, remoteObject);
 		} catch (RemoteException e) {
 			System.out.println(e);
+			e.printStackTrace();
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}
@@ -118,6 +120,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 			rebindServer(remoteObjectNameOnRegistry, remoteObject);
 		} catch (RemoteException e) {
 			System.out.println(e);
+			e.printStackTrace();
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}

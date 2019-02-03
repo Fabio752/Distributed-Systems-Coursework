@@ -18,7 +18,7 @@ public class UDPClient {
 
 	// Interval to sleep between two send requests to the server (ms).
 	// Needed in order to not overload the receiving socket.
-	private final int SLEEP_INTERVAL = 1;
+	private final int SLEEP_INTERVAL = 0;
 
 	private DatagramSocket sendSoc;
 
@@ -30,7 +30,7 @@ public class UDPClient {
 		// Get the parameters.
 		if (args.length < 3) {
 			System.err.println(
-				"Arguments required: server name/IP, recv port, message count");
+				"Arguments required: server name/IP, recv port, msg count");
 			System.exit(-1);
 		}
 
@@ -56,7 +56,9 @@ public class UDPClient {
 			// Automatically select the port for the socket.
 			sendSoc = new DatagramSocket();
 		} catch(SocketException e) {
-			System.out.println("Socket exception: " + e.getMessage());
+			System.out.println(e);
+			e.printStackTrace();
+			System.out.println("Quitting...");
 			System.exit(-1);
 		}
 	}
@@ -71,6 +73,7 @@ public class UDPClient {
 				Thread.sleep(SLEEP_INTERVAL);
 			} catch (InterruptedException e) {
 				System.out.println(e);
+				e.printStackTrace();
 				System.out.println("Quitting...");
 				System.exit(-1);
 			}

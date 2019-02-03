@@ -3,6 +3,7 @@
  */
 package rmi;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -23,7 +24,9 @@ public class RMIClient {
 	public static void main(String[] args) {
 		// Check arguments for Server host and number of messages.
 		if (args.length < 3){
-			System.out.println("Needs 2 arguments: ServerHostName/IPAddress, RemoteObjectName, TotalMessageCount");
+			System.out.println(
+				"Needs 2 arguments: ServerHostName/IPAddress, " +
+				"RemoteObjectName, TotalMessageCount");
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}
@@ -49,16 +52,9 @@ public class RMIClient {
 			for (int i = 0; i < numMessages; i++) {
 				remoteObject.receiveMessage(new MessageInfo(numMessages, i));
 			}
-		} catch (RemoteException e) {
+		} catch (RemoteException | NotBoundException | MalformedURLException e) {
 			System.out.println(e);
-			System.out.println("Quitting...");
-			System.exit(-1);
-		} catch (NotBoundException e) {
-			System.out.println(e);
-			System.out.println("Quitting...");
-			System.exit(-1);
-		} catch(Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}
