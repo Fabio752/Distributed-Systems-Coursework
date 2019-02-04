@@ -21,6 +21,7 @@ public class UDPClient {
 	private final int SLEEP_INTERVAL = 0;
 
 	private DatagramSocket sendSoc;
+	private long totalSendTime = 0;
 
 	public static void main(String[] args) {
 		InetAddress	serverAddr = null;
@@ -78,6 +79,10 @@ public class UDPClient {
 				System.exit(-1);
 			}
 		}
+		System.out.println("Total time (micro sec): " +
+											 String.format("%.3f", Double.valueOf(totalSendTime) / 1000));
+		System.out.println("Time per send (micro sec): " +
+											 String.format("%.3f", Double.valueOf(totalSendTime) / (1000 * countTo)));
 	}
 
 	private void send(String payload, InetAddress destAddr,
@@ -85,10 +90,15 @@ public class UDPClient {
 		// Build the datagram packet and send it to the server.
 		int payloadSize = payload.length();
 		byte[] pktData = payload.getBytes();
-		DatagramPacket pkt = new DatagramPacket(pktData, payloadSize, 
-																						destAddr, destPort);
+
 		try {
+			// Start time measurment.
+			long startTime = System.nanoTime();
+			DatagramPacket pkt = new DatagramPacket(pktData, payloadSize, 
+																						destAddr, destPort);
 			sendSoc.send(pkt);
+			long endTime = System.nanoTime();
+			totalSendTime += endTime - startTime;
 		} catch(IOException e) {
 			System.out.println("Send exception: " + e.getMessage());
 		}

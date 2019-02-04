@@ -15,7 +15,7 @@ import common.MessageInfo;
 public class UDPServer {
 
 	// Timeout to receive a message, in milliseconds.
-	private final static int timeout = 30000;
+	private final static int timeout = 10000;
 	private long startTime;
 	private long endTime;
 
@@ -39,9 +39,11 @@ public class UDPServer {
 				recvSoc.setSoTimeout(timeout);
 				recvSoc.receive(pac);
 			} catch (IOException e) {
+				endTime = System.nanoTime();
 				System.out.println(e);
 				e.printStackTrace();
 				System.out.println("Quitting...");
+				printResults(/*timeout=*/true);
 				System.exit(-1);
 			}
 
@@ -79,33 +81,42 @@ public class UDPServer {
 		if (msg.messageNum == totalMessages - 1) {
 			// End time measurment.
 			endTime = System.nanoTime();
-			double elapsedTime = (endTime - startTime) / 1000000; 
-
 			close = true;
-			int lostCount = 0;
-			System.out.println("\nLost messages: ");
-			for (int i = 0; i < receivedMessages.length; i++ ) {
-				if (receivedMessages[i] == 0) {
-					lostCount++;
-					System.out.print(i + " ");
-				}
-			}
-			System.out.println();
-			System.out.println(
-				"Received: " + (totalMessages-lostCount) + "/" +
-				totalMessages + "  ->  " + 
-				(Double.valueOf((totalMessages-lostCount)/totalMessages)*100)
-				+ "%");
-			System.out.println(
-				"Lost:     " + lostCount + "/" + totalMessages + "  ->  " + 
-				(Double.valueOf(lostCount / totalMessages)*100) + "%");
-			System.out.println(
-				"Total time elapsed (ms): " +
-				String.format("%.3f", elapsedTime));
-			System.out.println(
-				"Estimate time per package (ms): " +
-				String.format("%.3f", elapsedTime / totalMessages));
+			printResults(/*timeout=*/false);
 		}
+	}
+
+	private void printResults(boolean timeout) {
+		double elapsedTime = (endTime - startTime) / 1000;
+		int lostCount = 0;
+		System.out.println("\nLost messages: ");
+		for (int i = 0; i < receivedMessages.length; i++ ) {
+			if (receivedMessages[i] == 0) {
+				lostCount++;
+				System.out.print(i + " ");
+			}
+		}
+		System.out.println();
+		System.out.println(
+			"Received: " + (totalMessages - lostCount) + "/" +
+			totalMessages + "  ->  " +
+			(((Double.valueOf(totalMessages) - Double.valueOf(lostCount))/totalMessages)*100)
+			+ "%");
+		System.out.println(
+			"Lost:     " + lostCount + "/" + totalMessages + "  ->  " + 
+			((Double.valueOf(lostCount) / Double.valueOf(totalMessages))*100) + "%");
+		
+		// Time measurements.
+		if (timeout) {
+			System.out.println(
+				"WARNING: following measurements are not reliable due to timeout.");
+		}
+		System.out.println(
+			"Total time elapsed (micro sec): " +
+			String.format("%.3f", elapsedTime));
+		System.out.println(
+			"Estimate time per package (micro sec): " +
+			String.format("%.3f", elapsedTime / totalMessages));
 	}
 
 	public UDPServer(int rp) {
