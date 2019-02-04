@@ -50,7 +50,7 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 		if (msg.messageNum == totalMessages - 1) {
 			// End time measurment.
 			endTime = System.nanoTime();
-			double elapsedTime = (endTime - startTime) / 1000000;
+			double elapsedTime = (endTime - startTime) / 1000;
 
 			int lostCount = 0;
 			System.out.println("\nLost messages: ");
@@ -70,10 +70,10 @@ public class RMIServer extends UnicastRemoteObject implements RMIServerI {
 				"Lost:     " + lostCount + "/" + totalMessages + "\t->  " + 
 				(Double.valueOf(lostCount / totalMessages)*100) + "%");
 			System.out.println(
-				"Total time elapsed (ms): " +
+				"Total time elapsed (micro sec): " +
 				String.format("%.3f", elapsedTime));
 			System.out.println(
-				"Estimate time per package (ms): " +
+				"Estimate time per package (micro sec): " +
 				String.format("%.3f", elapsedTime / totalMessages));
 		}
 	}

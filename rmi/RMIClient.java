@@ -40,6 +40,8 @@ public class RMIClient {
 			System.setSecurityManager(new RMISecurityManager());
 		}
 
+		long startTime, endTime;
+		long totalSendTime = 0;
 		try {
 			// Get the registry located at the specified port on the server
 			// and then bind a local object to the remote object.
@@ -50,7 +52,10 @@ public class RMIClient {
 
 			// Attempt to send messages the specified number of times.
 			for (int i = 0; i < numMessages; i++) {
+				startTime = System.nanoTime();
 				remoteObject.receiveMessage(new MessageInfo(numMessages, i));
+				endTime = System.nanoTime();
+				totalSendTime += endTime - startTime;
 			}
 		} catch (RemoteException | NotBoundException | MalformedURLException e) {
 			System.out.println(e);
@@ -58,5 +63,9 @@ public class RMIClient {
 			System.out.println("Quitting...");
 			System.exit(-1);
 		}
+		System.out.println("Total time (micro sec): " +
+											 String.format("%.3f", Double.valueOf(totalSendTime) / 1000));
+		System.out.println("Time per send (micro sec): " +
+											 String.format("%.3f", Double.valueOf(totalSendTime) / (1000 * numMessages)));
 	}
 }
